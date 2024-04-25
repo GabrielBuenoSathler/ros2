@@ -1,0 +1,36 @@
+import rclpy
+from geometry_msgs.msg import Twist
+import time
+
+def move_forward(node):
+    velocity_publisher = node.create_publisher(Twist, '/cmd_vel', 10)
+    cmd_vel = Twist()
+    cmd_vel.linear.x = 0.5  # Set linear velocity (m/s) to move forward
+    cmd_vel.angular.z = 0.0  # Set angular velocity to 0 (no rotation)
+    velocity_publisher.publish(cmd_vel)
+    return velocity_publisher
+
+def stop_movement(velocity_publisher):
+    cmd_vel = Twist()
+    cmd_vel.linear.x = 0.0  # Set linear velocity to 0 to stop
+    cmd_vel.angular.z = 0.0  # Set angular velocity to 0 to stop
+    velocity_publisher.publish(cmd_vel)
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = rclpy.create_node('move_and_stop')
+
+    velocity_publisher = move_forward(node)
+
+    # Sleep for a short duration to let the robot move forward
+    time.sleep(2)
+
+    stop_movement(velocity_publisher)
+
+    rclpy.spin_once(node, timeout_sec=1)  # Spin once to publish the velocity command
+
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
